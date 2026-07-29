@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informatik 9 &ndash; Nachpr&uuml;fungs-Trainer</title>
+<style>
+:root {
+  --bg: #0f172a;
+  --bg2: #1e293b;
+  --card: #ffffff;
+  --card2: #f8fafc;
+  --accent: #6366f1;
+  --accent2: #8b5cf6;
+  --good: #16a34a;
+  --good-bg: #dcfce7;
+  --bad: #dc2626;
+  --bad-bg: #fee2e2;
+  --gold-bg: #fef9c3;
+  --gold-border: #eab308;
+  --text: #1e293b;
+  --muted: #64748b;
+  --radius: 14px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: linear-gradient(160deg, var(--bg), var(--bg2) 60%, #312e81);
+  color: var(--text);
+  min-height: 100vh;
+}
+header {
+  padding: 22px 20px 14px;
+  text-align: center;
+  color: white;
+}
+header h1 {
+  margin: 0 0 4px;
+  font-size: 1.6em;
+}
+header p { margin: 4px 0; opacity: 0.85; font-size: 0.95em; }
+#countdown {
+  display: inline-block;
+  margin-top: 8px;
+  background: rgba(255,255,255,0.12);
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+nav.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(15,23,42,0.85);
+  backdrop-filter: blur(6px);
+}
+nav.tabs button {
+  background: rgba(255,255,255,0.08);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 10px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.92em;
+  font-weight: 600;
+  transition: all .15s;
+}
+nav.tabs button:hover { background: rgba(255,255,255,0.18); }
+nav.tabs button.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-color: transparent;
+}
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px 14px 60px;
+}
+.view { display: none; }
+.view.active { display: block; animation: fadein .25s ease; }
+@keyframes fadein { from {opacity:0; transform: translateY(6px);} to {opacity:1; transform: translateY(0);} }
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+.progress-wrap {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+.progress-bar-bg {
+  background: #e2e8f0;
+  border-radius: 999px;
+  height: 14px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 999px;
+  transition: width .4s;
+}
+.day-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  border-left: 6px solid var(--accent);
+}
+.day-card.free { border-left-color: #94a3b8; opacity: 0.85; }
+.day-card.done { border-left-color: var(--good); background: #f0fdf4; }
+.day-card .day-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.day-card .day-date { font-weight: 700; color: var(--accent); font-size: 0.85em; text-transform: uppercase; letter-spacing: .03em; }
+.day-card .day-title { font-size: 1.15em; font-weight: 700; margin: 2px 0 8px; }
+.day-card .day-minutes { font-size: 0.8em; color: var(--muted); background: var(--card2); padding: 3px 10px; border-radius: 999px; }
+.day-card ul { margin: 8px 0 10px; padding-left: 20px; }
+.day-card li { margin-bottom: 4px; font-size: 0.95em; }
+.day-btn {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.88em;
+}
+.day-btn.todo { background: var(--accent); color: white; }
+.day-btn.done { background: var(--good); color: white; }
+.jump-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.85em;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.module-card { margin-bottom: 18px; }
+.module-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+.module-head .icon { font-size: 1.8em; }
+.module-head h2 { margin: 0; font-size: 1.25em; }
+.module-head .intro { margin: 2px 0 0; font-size: 0.82em; color: var(--muted); }
+.module-body { display: none; margin-top: 14px; }
+.module-body.open { display: block; }
+.explain { line-height: 1.55; font-size: 0.98em; }
+.explain code, .example code, pre code { background: #eef2ff; padding: 1px 6px; border-radius: 5px; font-size: 0.92em; color: #4338ca; }
+.golden-box {
+  background: var(--gold-bg);
+  border: 2px solid var(--gold-border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 14px 0;
+}
+.golden-box h3 { margin: 0 0 8px; font-size: 1em; color: #92400e; }
+.golden-box ul { margin: 0; padding-left: 20px; }
+.golden-box li { margin-bottom: 6px; font-size: 0.93em; }
+.example-box {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 12px 0;
+  overflow-x: auto;
+}
+.example-box .example-title { color: #94a3b8; font-size: 0.8em; margin-bottom: 6px; font-weight: 700; text-transform: uppercase; }
+.example-box pre { margin: 0; white-space: pre-wrap; font-family: "SF Mono", Consolas, monospace; font-size: 0.85em; line-height: 1.5; }
+.section-label {
+  font-weight: 700;
+  margin: 18px 0 8px;
+  font-size: 1em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.exercise {
+  background: var(--card2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.exercise .ex-q { font-size: 0.93em; margin-bottom: 8px; }
+.exercise .ex-q code, .exercise .ex-sol code { background: #e0e7ff; padding: 1px 5px; border-radius: 4px; color: #4338ca; }
+.toggle-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.82em;
+  cursor: pointer;
+  font-weight: 600;
+}
+.ex-sol {
+  display: none;
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--good-bg);
+  border-radius: 8px;
+  font-size: 0.9em;
+  line-height: 1.5;
+  border-left: 4px solid var(--good);
+}
+.ex-sol.open { display: block; }
+.ex-sol pre { white-space: pre-wrap; margin: 4px 0 0; font-family: "SF Mono", Consolas, monospace; }
+
+.quiz-q { background: var(--card2); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+.quiz-q .qq-text { font-size: 0.93em; font-weight: 600; margin-bottom: 8px; }
+.quiz-opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: white;
+  border: 1.5px solid #cbd5e1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  font-size: 0.88em;
+}
+.quiz-opt:hover { border-color: var(--accent); }
+.quiz-opt.correct { background: var(--good-bg); border-color: var(--good); font-weight: 700; }
+.quiz-opt.wrong { background: var(--bad-bg); border-color: var(--bad); }
+.quiz-opt[disabled] { cursor: default; }
+.quiz-expl { font-size: 0.85em; margin-top: 6px; color: var(--muted); display: none; }
+.quiz-expl.open { display: block; }
+.quiz-score {
+  margin-top: 12px;
+  font-weight: 700;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--card2);
+}
+.reset-btn { background: none; border: 1.5px solid var(--muted); color: var(--muted); padding: 6px 12px; border-radius: 8px; font-size: 0.8em; cursor: pointer; margin-top: 8px; }
+
+.exam-head { text-align: center; margin-bottom: 8px; }
+.exam-timer {
+  font-size: 1.6em;
+  font-weight: 800;
+  color: var(--accent);
+  text-align: center;
+  margin: 6px 0 12px;
+}
+.exam-q { background: var(--card2); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+.exam-q .eq-meta { font-size: 0.78em; color: var(--muted); margin-bottom: 4px; font-weight: 700; text-transform: uppercase; }
+.exam-q .eq-text { font-size: 0.96em; margin-bottom: 10px; line-height: 1.5; }
+.exam-check { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 0.88em; font-weight: 600; }
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75em;
+  font-weight: 700;
+  background: var(--accent);
+  color: white;
+}
+.grade-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.88em; }
+.grade-table th, .grade-table td { padding: 6px 10px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+.cheat-topic { margin-bottom: 20px; }
+.cheat-topic h3 { margin: 0 0 8px; color: var(--accent); }
+.footer-note { text-align: center; color: rgba(255,255,255,0.6); font-size: 0.8em; padding: 20px; }
+.big-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white;
+  font-weight: 700;
+  font-size: 1em;
+  cursor: pointer;
+  margin-top: 10px;
+}
+.pill { display: inline-block; background: var(--card2); border-radius: 999px; padding: 3px 10px; font-size: 0.78em; margin-right: 6px; color: var(--muted); font-weight: 600;}
+@media (max-width: 600px) {
+  header h1 { font-size: 1.3em; }
+  nav.tabs button { padding: 8px 12px; font-size: 0.85em; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>&#128187; Informatik 9 &ndash; Nachpr&uuml;fungs-Trainer</h1>
+  <p>Dein pers&ouml;nlicher Lernplan f&uuml;r die Nachpr&uuml;fung &middot; Ziel: mindestens Note 4, Wunschziel 1&ndash;2</p>
+  <div id="countdown"></div>
+</header>
+
+<nav class="tabs">
+  <button data-view="plan" class="active">&#128197; Lernplan</button>
+  <button data-view="themen">&#128218; Themen</button>
+  <button data-view="pruefungen">&#128221; &Uuml;bungspr&uuml;fungen</button>
+  <button data-view="spick">&#127919; Spickzettel</button>
+</nav>
+
+<main>
+
+  <div id="view-plan" class="view active">
+    <div class="progress-wrap">
+      <div style="display:flex; justify-content:space-between; font-weight:700;">
+        <span>Dein Fortschritt</span>
+        <span id="plan-progress-text">0%</span>
+      </div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="plan-progress-fill" style="width:0%"></div></div>
+    </div>
+    <div id="plan-list"></div>
+  </div>
+
+  <div id="view-themen" class="view">
+    <div id="module-list"></div>
+  </div>
+
+  <div id="view-pruefungen" class="view">
+    <div class="card">
+      <h2 style="margin-top:0;">&#128221; &Uuml;bungspr&uuml;fungen</h2>
+      <p style="color:var(--muted); font-size:0.92em;">Simuliere die echte Pr&uuml;fung: Handy weg, Timer starten, in einem Rutsch durcharbeiten. Danach mit der Musterl&ouml;sung vergleichen und ehrlich abhaken, was richtig war &ndash; die Punkte werden automatisch zusammengez&auml;hlt.</p>
+    </div>
+    <div id="exam-list"></div>
+  </div>
+
+  <div id="view-spick" class="view">
+    <div class="card">
+      <h2 style="margin-top:0;">&#127919; Der grosse Spickzettel</h2>
+      <p style="color:var(--muted); font-size:0.92em;">Alle goldenen Regeln auf einen Blick &ndash; perfekt f&uuml;r den letzten Blick vor der Pr&uuml;fung.</p>
+    </div>
+    <div id="cheat-list"></div>
+  </div>
+
+</main>
+
+<div class="footer-note">Viel Erfolg! Du schaffst das. &#128170;</div>
+
+<script>
+const DATA = {"plan": [{"date": "Do, 30.07.2026", "week": 1, "title": "Start: Tabellenkalkulation Teil 1", "minutes": 90, "tasks": ["Modul 1 lesen: Formeln & Zellbezuege", "Goldene Regeln auswendig lernen", "Uebungen 1-3 in Modul 1 loesen", "Mini-Quiz Modul 1 (mind. 4/6 richtig)"], "module": "m1"}, {"date": "Fr, 31.07.2026", "week": 1, "title": "Tabellenkalkulation Teil 2", "minutes": 90, "tasks": ["Modul 1 Uebungen 4-5 loesen", "Quiz Modul 1 wiederholen bis 6/6", "Kurze Pause nicht vergessen!"], "module": "m1"}, {"date": "Sa/So, 01.-02.08.2026", "week": 1, "title": "Frei / Verschnaufpause", "minutes": 0, "tasks": ["Kein Lernen! Kopf frei bekommen."], "module": null}, {"date": "Mo, 03.08.2026", "week": 2, "title": "Datenbanken Teil 1", "minutes": 90, "tasks": ["Modul 2 lesen: Datenbank-Grundbegriffe & SQL SELECT/FROM/WHERE", "Goldene Regeln lernen", "Uebungen 1-3"], "module": "m2"}, {"date": "Di, 04.08.2026", "week": 2, "title": "Datenbanken Teil 2", "minutes": 90, "tasks": ["Modul 2 Uebungen 4-6 (SQL schreiben)", "Quiz Modul 2 bis 6/6"], "module": "m2"}, {"date": "Mi, 05.08.2026", "week": 2, "title": "Wiederholung Woche 1+2", "minutes": 60, "tasks": ["Spickzettel Modul 1+2 durchlesen", "Quiz Modul 1 UND 2 nochmal machen", "Schwache Themen markieren"], "module": null}, {"date": "Do, 06.08.2026", "week": 2, "title": "Frei", "minutes": 0, "tasks": ["Pause!"], "module": null}, {"date": "Fr, 07.08.2026", "week": 2, "title": "OOP Grundbegriffe", "minutes": 90, "tasks": ["Modul 3 lesen: Klasse, Objekt, Attribut, Methode", "Klassenkarte & Objektkarte ueben", "Uebungen + Quiz Modul 3"], "module": "m3"}, {"date": "Sa/So, 08.-09.08.2026", "week": 2, "title": "Frei", "minutes": 0, "tasks": ["Pause!"], "module": null}, {"date": "Mo, 10.08.2026", "week": 3, "title": "Datentypen", "minutes": 90, "tasks": ["Modul 4 lesen: int, double, String, char, boolean", "Uebungen 1-3", "Quiz Modul 4"], "module": "m4"}, {"date": "Di, 11.08.2026", "week": 3, "title": "Attribute vs. lokale Variable & this", "minutes": 60, "tasks": ["Modul 4 Rest lesen (this, Wertzuweisung)", "Uebungen 4-5", "Quiz Modul 4 wiederholen"], "module": "m4"}, {"date": "Mi, 12.08.2026", "week": 3, "title": "Frei", "minutes": 0, "tasks": ["Pause!"], "module": null}, {"date": "Do, 13.08.2026", "week": 3, "title": "Methoden Teil 1", "minutes": 90, "tasks": ["Modul 5 lesen: Methodenkopf, void, Methodenrumpf", "Uebungen 1-2", "Quiz Modul 5"], "module": "m5"}, {"date": "Fr, 14.08.2026", "week": 3, "title": "Methoden Teil 2", "minutes": 90, "tasks": ["Modul 5: Parameter & Rueckgabewert", "Uebungen 3-5", "Quiz Modul 5 wiederholen"], "module": "m5"}, {"date": "Sa/So, 15.-16.08.2026", "week": 3, "title": "Frei", "minutes": 0, "tasks": ["Pause!"], "module": null}, {"date": "Mo, 17.08.2026", "week": 4, "title": "Konstruktor", "minutes": 90, "tasks": ["Modul 6 lesen: Konstruktor", "Uebungen 1-3", "Quiz Modul 6 (Konstruktor-Fragen)"], "module": "m6"}, {"date": "Di, 18.08.2026", "week": 4, "title": "Getter-Methoden", "minutes": 60, "tasks": ["Modul 6 Rest: Getter-Methoden", "Uebungen 4-5", "Quiz Modul 6 komplett"], "module": "m6"}, {"date": "Mi, 19.08.2026", "week": 4, "title": "Grosse Wiederholung M3-M6", "minutes": 90, "tasks": ["Spickzettel M3-M6 durchlesen", "Alle 4 Quiz nochmal (Ziel: ueberall 5+/6)", "Schwachstellen-Liste aktualisieren"], "module": null}, {"date": "Do, 20.08.2026", "week": 4, "title": "Frei", "minutes": 0, "tasks": ["Pause!"], "module": null}, {"date": "Fr, 21.08.2026", "week": 4, "title": "Bedingungen", "minutes": 90, "tasks": ["Modul 7 lesen: if/else, Vergleiche, && || !", "Uebungen 1-3", "Quiz Modul 7 (Teil Bedingungen)"], "module": "m7"}, {"date": "Sa/So, 22.-23.08.2026", "week": 4, "title": "Frei", "minutes": 0, "tasks": ["Pause!"], "module": null}, {"date": "Mo, 24.08.2026", "week": 5, "title": "Schleifen (while)", "minutes": 60, "tasks": ["Modul 7 Rest: while-Schleife", "Uebungen 4-5", "Quiz Modul 7 komplett"], "module": "m7"}, {"date": "Di, 25.08.2026", "week": 5, "title": "Vererbung", "minutes": 90, "tasks": ["Modul 8 lesen: extends, Ober-/Unterklasse", "Uebungen 1-4", "Quiz Modul 8"], "module": "m8"}, {"date": "Mi, 26.08.2026", "week": 5, "title": "Frei", "minutes": 0, "tasks": ["Pause! Naechste Woche geht's an die Pruefungen."], "module": null}, {"date": "Do, 27.08.2026", "week": 5, "title": "Uebungspruefung 1 (voll, ~60 Min.)", "minutes": 90, "tasks": ["Handy weg, Timer stellen (60 Min.)", "Uebungspruefung 1 komplett durchrechnen", "Danach: Musterloesung vergleichen & Note ausrechnen"], "module": "exam1"}, {"date": "Fr, 28.08.2026", "week": 5, "title": "Fehler ausbuegeln", "minutes": 90, "tasks": ["Nur die Themen wiederholen, die in Pruefung 1 schiefgingen", "Passendes Modul + Quiz nochmal"], "module": null}, {"date": "Sa/So, 29.-30.08.2026", "week": 5, "title": "Frei", "minutes": 0, "tasks": ["Pause!"], "module": null}, {"date": "Mo, 31.08.2026", "week": 6, "title": "Uebungspruefung 2 (voll, ~60 Min.)", "minutes": 90, "tasks": ["Timer stellen (60 Min.)", "Uebungspruefung 2 komplett durchrechnen", "Musterloesung vergleichen"], "module": "exam2"}, {"date": "Di, 01.09.2026", "week": 6, "title": "Fehler ausbuegeln + Spickzettel", "minutes": 60, "tasks": ["Schwachstellen aus Pruefung 2 wiederholen", "Kompletten Spickzettel einmal durchlesen"], "module": null}, {"date": "Mi, 02.09.2026", "week": 6, "title": "Uebungspruefung 3 (Kurzversion, ~40 Min.)", "minutes": 60, "tasks": ["Uebungspruefung 3 als letzten Check loesen", "Musterloesung vergleichen"], "module": "exam3"}, {"date": "Do, 03.09.2026", "week": 6, "title": "Letzter Feinschliff", "minutes": 45, "tasks": ["Nur Spickzettel + goldene Regeln aller Module ueberfliegen", "FRUEH SCHLAFEN GEHEN", "Kein neuer Stoff mehr!"], "module": null}, {"date": "Fr, 04.09.2026 (oder Pruefungstag)", "week": 6, "title": "PRUEFUNGSTAG", "minutes": 0, "tasks": ["Ruhig bleiben, du hast das drauf!", "Zuerst alle Aufgaben durchlesen, leichte zuerst loesen", "Bei SQL/Java-Code: Syntax genau pruefen (Semikolon, Klammern, Anfuehrungszeichen)"], "module": null}], "modules": [{"id": "m1", "icon": "📊", "num": 1, "title": "Tabellenkalkulation: Formeln & Zellbezüge", "intro": "Lernbereich 1 &middot; Excel-Grundlagen", "explain": "\nEine Tabellenkalkulation (z.&nbsp;B. <b>Excel</b>) ist wie ein riesiges kariertes Blatt Papier,\nauf dem der Computer f&uuml;r dich rechnet. Jedes K&auml;stchen hei&szlig;t <b>Zelle</b> und hat\neine Adresse aus <b>Spalte (Buchstabe) + Zeile (Zahl)</b>, z.&nbsp;B. <code>B5</code>.<br><br>\nWenn der Computer rechnen soll, schreibst du eine <b>Formel</b> &ndash; die beginnt IMMER mit\neinem Gleichheitszeichen <code>=</code>. Ein <b>Zellbezug</b> bedeutet: Statt einer Zahl schreibst\ndu die Adresse einer anderen Zelle in die Formel, z.&nbsp;B. <code>=A1+A2</code>.<br><br>\nEs gibt zwei Arten von Bez&uuml;gen: <b>relativ</b> (z.&nbsp;B. <code>B5</code>) &ndash; &auml;ndert\nsich automatisch beim Kopieren &ndash; und <b>absolut</b> (z.&nbsp;B. <code>$B$5</code>) &ndash; bleibt\nbeim Kopieren immer gleich (Dollarzeichen = \"festgeklebt\"!).\n", "rules": ["Jede Formel beginnt mit <code>=</code> &ndash; sonst ist es nur Text!", "Zelladresse = Spalte (Buchstabe) zuerst, dann Zeile (Zahl) &ndash; z.&nbsp;B. <code>C8</code>, nicht <code>8C</code>", "Relativer Bezug (<code>B5</code>): &auml;ndert sich automatisch beim Kopieren der Formel", "Absoluter Bezug (<code>$B$5</code>): bleibt beim Kopieren IMMER gleich &ndash; wichtig bei festen Werten wie Zinssatz oder Steuersatz!", "Nie mit Leerzeichen vor Formeln/Zahlen beginnen &ndash; Excel macht sonst Text daraus", "Wichtige Funktionen: <code>=SUMME(A1:A5)</code> addiert, <code>=WENN(Bedingung;dann;sonst)</code> prueft eine Bedingung"], "example_title": "Beispiel: Zinsberechnung", "example": "Betrag steht in B3 (10000), Zinssatz in D3 (0.02):\nZins nach einem Jahr:      =B3*D3\nBetrag nach einem Jahr:    =B7+B3   (B7 = Ergebnis der Zins-Formel)\n\nKopierst du die Formel =A5*$B$2 von Zeile 5 nach Zeile 6, wird daraus automatisch:\n=A6*$B$2   (A5 wird zu A6, aber $B$2 bleibt fest!)", "exercises": [{"q": "Du hast in A1 den Preis (10&euro;) und in B1 die Menge (3 St&uuml;ck). Schreibe die Formel f&uuml;r den Gesamtpreis in C1.", "sol": "<code>=A1*B1</code><br>Erkl&auml;rung: Preis mal Menge = Gesamtpreis. Immer mit = beginnen!"}, {"q": "In B2 steht ein fester Zinssatz (0,02), der f&uuml;r ALLE Zeilen gleich bleiben soll. Du willst die Formel <code>=A5*B2</code> nach unten kopieren. Was musst du am Bezug zu B2 &auml;ndern, damit er sich nicht verschiebt?", "sol": "Aus <code>B2</code> muss <code>$B$2</code> werden (absoluter Bezug). Sonst wird beim Kopieren daraus B3, B4, usw. &ndash; und das Ergebnis ist falsch."}, {"q": "Was zeigt die Formel <code>=SUMME(A1:A5)</code> an?", "sol": "Die Summe (Addition) aller Werte in den Zellen A1 bis A5."}, {"q": "Warum kann die Eingabe <code> =5+3</code> (mit einem Leerzeichen davor) ein Problem sein?", "sol": "Excel erkennt es dann eventuell nicht mehr als Formel/Zahl, sondern behandelt die Eingabe als Text. Formeln und Zahlen sollten nie mit einem Leerzeichen beginnen."}, {"q": "In Zelle B4 steht der Verkaufspreis (1,99), in B3 die Anzahl (100). Wie lautet die Formel f&uuml;r die Einnahmen in B5?", "sol": "<code>=B3*B4</code> (Anzahl mal Verkaufspreis)"}], "quiz": [{"q": "Womit beginnt jede Formel in Excel?", "opts": ["Mit +", "Mit =", "Mit #", "Mit Start"], "correct": 1, "expl": "Formeln beginnen immer mit dem Gleichheitszeichen ="}, {"q": "Was ist die richtige Zelladresse f&uuml;r Spalte D, Zeile 7?", "opts": ["7D", "D7", "7-D", "D:7"], "correct": 1, "expl": "Immer erst der Spaltenbuchstabe, dann die Zeilenzahl: D7"}, {"q": "Du kopierst die Formel mit Bezug <code>B2</code> (relativ) eine Zeile nach unten. Was steht danach in der Formel?", "opts": ["B2 bleibt gleich", "B3", "A2", "C2"], "correct": 1, "expl": "Relative Bezuege verschieben sich automatisch mit &ndash; eine Zeile tiefer wird aus B2 also B3"}, {"q": "Wie schreibt man einen absoluten (festen) Bezug auf Zelle B2?", "opts": ["#B2", "B2!", "$B$2", "[B2]"], "correct": 2, "expl": "Dollarzeichen vor Spalte UND Zeile: $B$2 bleibt beim Kopieren immer gleich"}, {"q": "Was macht die Formel <code>=SUMME(A1:A10)</code>?", "opts": ["Zaehlt die Zellen", "Addiert A1 bis A10", "Sortiert die Zellen", "Loescht die Zellen"], "correct": 1, "expl": "SUMME() addiert alle Werte im angegebenen Bereich"}, {"q": "Ein Datenflussdiagramm zeigt...", "opts": ["nur das Design der Tabelle", "wie Daten in eine Funktion rein- und wieder rausflie&szlig;en", "die Farben der Zellen", "die Rechtschreibpruefung"], "correct": 1, "expl": "Ein Datenflussdiagramm stellt dar, welche Eingaben eine Funktion braucht und welche Ausgabe sie liefert (Verteiler, Ein-/Ausgang)"}]}, {"id": "m2", "icon": "🗄️", "num": 2, "title": "Datenmodellierung & Datenbanken (SQL)", "intro": "Lernbereich 2 &middot; Relationale Datenbanken", "explain": "\nEine <b>Datenbank</b> ist wie ein super-organisierter Aktenordner mit <b>Tabellen</b>. Jede Tabelle hat\n<b>Spalten</b> (welche Info wird gespeichert, z.&nbsp;B. \"Name\") und <b>Zeilen</b> = <b>Datens&auml;tze</b>\n(ein konkreter Eintrag, z.&nbsp;B. ein Kunde). Jede Zeile hat meist einen <b>Prim&auml;rschl&uuml;ssel</b>\n&ndash; eine eindeutige ID, die keinen Eintrag verwechseln l&auml;sst (wie deine Sch&uuml;lernummer).<br><br>\nMit <b>SQL</b> (Structured Query Language) stellst du der Datenbank Fragen (\"Abfragen\"), z.&nbsp;B.\n\"Zeig mir alle Kunden aus M&uuml;nchen\". Das Ergebnis einer Abfrage ist immer eine neue Tabelle\n(<b>Ergebnistabelle</b>).\n", "rules": ["<code>SELECT</code> = WELCHE Spalten willst du sehen?  &nbsp;<code>FROM</code> = AUS welcher Tabelle?  &nbsp;<code>WHERE</code> = welche BEDINGUNG?", "Immer diese Reihenfolge: <code>SELECT ... FROM ... WHERE ...</code>", "<code>SELECT *</code> bedeutet: ALLE Spalten anzeigen", "Textwerte IMMER in Anf&uuml;hrungszeichen: <code>WHERE farbe = 'rot'</code>", "<code>ORDER BY spalte ASC/DESC</code> sortiert (ASC = aufsteigend, DESC = absteigend)", "<code>DISTINCT</code> entfernt doppelte Ergebnisse, <code>AS</code> vergibt einen neuen Spaltennamen", "Bedingungen kombinieren: <code>AND</code> (beide muessen gelten), <code>OR</code> (mindestens eine)"], "example_title": "Beispiel-Tabelle \"Kleidung\" (Spalten: artikelnummer, art, farbe, preis)", "example": "Alle Artikel zeigen:\nSELECT * FROM Kleidung;\n\nNur Art und Farbe zeigen, die unter 20 Euro kosten, teuerste zuerst:\nSELECT art, farbe FROM Kleidung WHERE preis < 20 ORDER BY preis DESC;", "exercises": [{"q": "Schreibe eine Abfrage, die ALLE Spalten der Tabelle <code>Kleidung</code> zeigt.", "sol": "<code>SELECT * FROM Kleidung;</code>"}, {"q": "Zeige nur die Spalten <code>art</code> und <code>farbe</code> aus <code>Kleidung</code>.", "sol": "<code>SELECT art, farbe FROM Kleidung;</code>"}, {"q": "Zeige alle Artikel aus <code>Kleidung</code>, die WENIGER als 15 Euro kosten.", "sol": "<code>SELECT * FROM Kleidung WHERE preis < 15;</code>"}, {"q": "Zeige alle T-Shirts, die entweder rot ODER blau sind (Spalte <code>art</code> und <code>farbe</code>).", "sol": "<code>SELECT * FROM Kleidung WHERE art = 'T-Shirt' AND (farbe = 'rot' OR farbe = 'blau');</code>"}, {"q": "Sortiere alle Artikel nach Preis, teuerster zuerst.", "sol": "<code>SELECT * FROM Kleidung ORDER BY preis DESC;</code>"}, {"q": "Zeige alle unterschiedlichen (keine doppelten) Farben, die in der Tabelle vorkommen.", "sol": "<code>SELECT DISTINCT farbe FROM Kleidung;</code>"}], "quiz": [{"q": "Welches Schl&uuml;sselwort legt fest, AUS welcher Tabelle Daten kommen?", "opts": ["SELECT", "FROM", "WHERE", "ORDER BY"], "correct": 1, "expl": "FROM gibt die Tabelle an, aus der gelesen wird"}, {"q": "Was bedeutet <code>SELECT *</code>?", "opts": ["Nur eine Spalte", "Alle Spalten", "Alle Tabellen", "Nichts"], "correct": 1, "expl": "Der Stern * steht fuer 'alle Spalten'"}, {"q": "Wie vergleicht man richtig mit einem Text in SQL?", "opts": ["WHERE farbe = rot", "WHERE farbe = 'rot'", "WHERE farbe == rot", "WHERE farbe : rot"], "correct": 1, "expl": "Textwerte muessen in Anfuehrungszeichen (Hochkomma) stehen"}, {"q": "Was macht <code>ORDER BY preis DESC</code>?", "opts": ["Sortiert aufsteigend", "Sortiert absteigend", "Loescht Duplikate", "Zaehlt Zeilen"], "correct": 1, "expl": "DESC = descending = absteigend (gross nach klein)"}, {"q": "Ein Prim&auml;rschl&uuml;ssel ist...", "opts": ["die teuerste Spalte", "eine eindeutige ID pro Datensatz", "ein Passwort", "eine Formel"], "correct": 1, "expl": "Der Primaerschluessel identifiziert jeden Datensatz eindeutig (z.B. Artikelnummer)"}, {"q": "Wie verkn&uuml;pft man zwei Bedingungen, die BEIDE gleichzeitig gelten m&uuml;ssen?", "opts": ["OR", "AND", "NOT", "="], "correct": 1, "expl": "AND verlangt, dass beide Bedingungen wahr sind"}]}, {"id": "m3", "icon": "🧩", "num": 3, "title": "OOP-Grundbegriffe: Klasse, Objekt, Attribut, Methode", "intro": "Lernbereich 3 &middot; Objektorientierte Modellierung", "explain": "\nIn der objektorientierten Programmierung denkst du in \"Dingen\" (Objekten).<br><br>\nEine <b>Klasse</b> ist wie ein <b>Bauplan</b> oder eine Keksausstecher-Form &ndash; sie existiert nur\nEINMAL. Ein <b>Objekt</b> ist ein konkretes Ding, das nach diesem Bauplan gebaut wurde (der Keks!)\n&ndash; davon kann es VIELE geben.<br><br>\nEin <b>Attribut</b> ist eine Eigenschaft (z.&nbsp;B. Name, Alter, Farbe), die in der Klasse definiert\nwird. Der <b>Attributwert</b> ist der konkrete Wert bei einem bestimmten Objekt (z.&nbsp;B. \"Lena\", 15,\n\"rot\"). Eine <b>Methode</b> ist eine F&auml;higkeit/Aktion, die das Objekt ausf&uuml;hren kann (z.&nbsp;B.\n<code>fahren()</code>, <code>getName()</code>).\n", "rules": ["Klasse = Bauplan (nur EINMAL) &nbsp;|&nbsp; Objekt = konkretes Exemplar (davon VIELE m&ouml;glich)", "Attribut = Eigenschaft (Variable in der Klasse) &nbsp;|&nbsp; Attributwert = der aktuelle, konkrete Wert", "Methode = was das Objekt TUN kann (eine Aktion/F&auml;higkeit)", "Merksatz: Klasse ist die Keksform, Objekte sind die Kekse, die damit ausgestochen werden", "Klassenkarte: Klassenname oben, Attribute (mit Datentyp) in der Mitte, Methoden unten", "Objektkarte sieht fast gleich aus, aber: <code>objektname:Klassenname</code> oben, und bei Attributen stehen konkrete WERTE"], "example_title": "Beispiel: Steckbrief als Klasse", "example": "Klassenkarte \"Steckbrief\":\n  Steckbrief          <- Klassenname\n  name: String         <- Attribut mit Datentyp\n  alter: int            <- Attribut mit Datentyp\n  getName(): String     <- Methode mit Rueckgabetyp\n\nObjektkarte (ein konkretes Objekt):\n  stahl:Steckbrief      <- Objektname:Klassenname\n  name = \"Frau Stahl\"   <- Attributwert\n  alter = 45", "exercises": [{"q": "Ordne zu: Bei einem Auto-Bauplan im Computerprogramm ist die Klasse \"Auto\" gegeben. Was ist DEIN konkretes Auto in der Einfahrt &ndash; Klasse oder Objekt?", "sol": "Objekt. Die Klasse \"Auto\" ist nur der Bauplan; dein konkretes Auto ist ein Objekt (eine Instanz) davon."}, {"q": "Nenne 3 typische Attribute f&uuml;r eine Klasse \"Person\" und 2 typische Methoden.", "sol": "Attribute (Beispiele): name, alter, groesse. Methoden (Beispiele): getName(), sagHallo()"}, {"q": "Was ist der Unterschied zwischen einer Klassenkarte und einer Objektkarte?", "sol": "Klassenkarte zeigt den allgemeinen Bauplan (Attribute mit Datentyp, Methoden). Objektkarte zeigt ein konkretes Objekt mit tatsaechlichen Attributwerten."}, {"q": "Gegeben: Klasse \"Hund\" mit Attribut <code>name: String</code>. Ein Objekt hei&szlig;t <code>bello:Hund</code> mit <code>name = \"Bello\"</code>. Was ist hier der Attributwert?", "sol": "\"Bello\" ist der Attributwert (der konkrete Wert des Attributs name bei diesem Objekt)."}], "quiz": [{"q": "Eine Klasse ist...", "opts": ["ein konkretes Objekt", "ein Bauplan fuer Objekte", "eine Methode", "ein Attributwert"], "correct": 1, "expl": "Die Klasse ist der Bauplan/die Schablone"}, {"q": "Wie viele Objekte kann man aus EINER Klasse erzeugen?", "opts": ["Genau eins", "Maximal zwei", "Beliebig viele", "Keins"], "correct": 2, "expl": "Aus einer Klasse (einem Bauplan) lassen sich beliebig viele Objekte erzeugen"}, {"q": "Ein Attribut ist...", "opts": ["eine Faehigkeit des Objekts", "eine Eigenschaft des Objekts", "der Klassenname", "eine Bedingung"], "correct": 1, "expl": "Attribute sind Eigenschaften (Variablen) eines Objekts"}, {"q": "Was steht in einer Objektkarte OBEN, im Gegensatz zur Klassenkarte?", "opts": ["Nur der Klassenname", "objektname:Klassenname", "Nur der Objektname", "Gar nichts"], "correct": 1, "expl": "Objektkarten zeigen 'objektname:Klassenname', z.B. stahl:Steckbrief"}, {"q": "Eine Methode...", "opts": ["speichert nur einen Wert", "beschreibt eine Faehigkeit/Aktion des Objekts", "ist ein anderes Wort fuer Klasse", "kann nie Parameter haben"], "correct": 1, "expl": "Methoden legen fest, was ein Objekt tun kann"}]}, {"id": "m4", "icon": "🔢", "num": 4, "title": "Datentypen & Wertzuweisung", "intro": "Lernbereich 3 &middot; Java-Grundlagen", "explain": "\nJedes Attribut und jede Variable in Java hat einen <b>Datentyp</b> &ndash; er legt fest, welche Art\nvon Wert gespeichert werden darf.<br><br>\n<b>int</b> = Ganzzahl (42, -1) &nbsp;|&nbsp; <b>double</b>/<b>float</b> = Kommazahl (3.14, IMMER mit\nPunkt statt Komma!) &nbsp;|&nbsp; <b>String</b> = Text, IMMER in doppelten Anf&uuml;hrungszeichen\n(\"Hallo\") &nbsp;|&nbsp; <b>char</b> = EIN einzelnes Zeichen, in einfachen Anf&uuml;hrungszeichen ('A')\n&nbsp;|&nbsp; <b>boolean</b> = Wahrheitswert, nur <code>true</code> oder <code>false</code>.<br><br>\nMit einer <b>Wertzuweisung</b> &auml;nderst du den Wert einer Variable/eines Attributs:\n<code>attributname = neuerWert;</code>. Wichtig: EIN Gleichheitszeichen <code>=</code> ist eine\nZuweisung, ZWEI Gleichheitszeichen <code>==</code> sind ein VERGLEICH!<br><br>\nAttribute geh&ouml;ren zur ganzen Klasse (existieren, solange das Objekt existiert &ndash;\n\"Langzeitged&auml;chtnis\"). <b>Lokale Variablen</b> werden nur INNERHALB einer Methode gebraucht und\nsind danach wieder weg (\"Kurzzeitged&auml;chtnis\"). Wenn ein Parameter/eine lokale Variable genauso\nhei&szlig;t wie ein Attribut, muss man mit <code>this.attributname</code> klarstellen, dass das\nAttribut gemeint ist.\n", "rules": ["int = Ganzzahl, double/float = Kommazahl (Punkt statt Komma!), String = Text (\"...\"), char = 1 Zeichen ('...'), boolean = true/false", "Text IMMER in DOPPELTEN Anf&uuml;hrungszeichen, einzelnes Zeichen in EINFACHEN Anf&uuml;hrungszeichen", "EIN <code>=</code> ist eine Wertzuweisung, ZWEI <code>==</code> sind ein Vergleich (Achtung, sehr h&auml;ufiger Fehler!)", "Attribut = geh&ouml;rt zur Klasse, bleibt erhalten, solange das Objekt lebt", "Lokale Variable = existiert nur innerhalb einer Methode, danach wieder weg", "<code>this.attribut</code> verwenden, wenn Parameter/lokale Variable und Attribut gleich hei&szlig;en &ndash; bei lokalen Variablen NIE this verwenden"], "example_title": "Beispiel: Datentypen & Wertzuweisung", "example": "String vorname = \"Lena\";\nint alter = 15;\ndouble koerpergroesse = 1.62;\nboolean istSchueler = true;\nchar noteBuchstabe = 'A';\n\nWertzuweisung (Aenderung eines bestehenden Attributs):\nschritte = 220;\nenergie = 500;", "exercises": [{"q": "Welcher Datentyp passt zu \"Anzahl der Sch&uuml;ler in einer Klasse\"?", "sol": "int (eine Ganzzahl, z.B. 28)"}, {"q": "Welcher Datentyp passt zu \"K&ouml;rpergr&ouml;&szlig;e in Metern\" (z.B. 1,73)?", "sol": "double (Kommazahl) &ndash; geschrieben als 1.73 mit Punkt"}, {"q": "Welcher Datentyp passt zu \"Ist der Sch&uuml;ler krank gemeldet?\"", "sol": "boolean (true oder false)"}, {"q": "Finde den Fehler: <code>alter = alter</code> (ohne Semikolon und ohne sinnvolle Aussage) &ndash; wie m&uuml;sste eine korrekte Wertzuweisung von 16 an das Attribut alter aussehen?", "sol": "<code>alter = 16;</code> &ndash; Semikolon am Ende nicht vergessen!"}, {"q": "Ein Konstruktor-Parameter hei&szlig;t genau wie das Attribut <code>name</code>. Wie weist man im Konstruktor den Parameterwert korrekt dem Attribut zu?", "sol": "<code>this.name = name;</code> &ndash; this. zeigt: links ist das ATTRIBUT gemeint, rechts der Parameter."}], "quiz": [{"q": "Welcher Datentyp speichert Text?", "opts": ["int", "String", "char", "boolean"], "correct": 1, "expl": "String speichert Zeichenketten (Text) in doppelten Anfuehrungszeichen"}, {"q": "Wie schreibt man die Zahl Pi (3,14) korrekt in Java?", "opts": ["3,14", "3.14", "'3.14'", "\"3,14\""], "correct": 1, "expl": "In Java wird ein Punkt statt Komma verwendet, ohne Anfuehrungszeichen (double/float)"}, {"q": "Was bedeutet <code>==</code> in Java?", "opts": ["Eine Zuweisung", "Ein Vergleich auf Gleichheit", "Ein Kommentar", "Nichts, ist ein Fehler"], "correct": 1, "expl": "Zwei Gleichheitszeichen pruefen, ob zwei Werte gleich sind. Ein = weist einen Wert zu!"}, {"q": "Eine lokale Variable...", "opts": ["existiert so lange wie das Objekt", "existiert nur innerhalb ihrer Methode", "ist dasselbe wie ein Attribut", "braucht immer this."], "correct": 1, "expl": "Lokale Variablen werden nach Ende der Methode wieder vergessen"}, {"q": "Wann braucht man <code>this.</code> vor einem Attributnamen?", "opts": ["Immer", "Nie", "Wenn Parameter/lokale Variable gleich heisst wie das Attribut", "Nur bei int"], "correct": 2, "expl": "this. loest den Namenskonflikt zwischen Attribut und gleichnamigem Parameter"}]}, {"id": "m5", "icon": "⚙️", "num": 5, "title": "Methoden: Kopf, Parameter, Rückgabewert", "intro": "Lernbereich 3 &middot; Methoden implementieren", "explain": "\nEine <b>Methode</b> ist ein benannter Block aus Programmcode, der eine bestimmte Aufgabe erledigt.\nSie wird nur ausgef&uuml;hrt, wenn sie AUFGERUFEN wird.<br><br>\nDer <b>Methodenkopf</b> (die erste Zeile) hat immer diesen Aufbau:\n<code>public void methodenName() { }</code>. <b>public</b> = von au&szlig;en aufrufbar,\n<b>void</b> = \"gibt nichts zur&uuml;ck\". Wenn eine Methode etwas zur&uuml;ckgeben soll, steht statt\nvoid der <b>R&uuml;ckgabetyp</b> da (z.&nbsp;B. <code>int</code>), und im Methodenrumpf MUSS ein\n<code>return wert;</code> stehen.<br><br>\n<b>Parameter</b> sind Werte, die man der Methode beim Aufruf mitgibt &ndash; sie stehen in den runden\nKlammern mit Datentyp: <code>public void ablegen(String gegenstand)</code>. Beim Aufruf schreibt man\ndann z.&nbsp;B. <code>ablegen(\"Schraube\")</code>.\n", "rules": ["Methodenkopf immer: <code>public void methodenName() { ... }</code> (wenn nichts zur&uuml;ckgegeben wird)", "void = gibt NICHTS zur&uuml;ck. Sonst: R&uuml;ckgabetyp angeben (z.&nbsp;B. int) UND <code>return wert;</code> im Rumpf", "Parameter stehen in den runden Klammern MIT Datentyp: <code>(int anzahl)</code>, <code>(String name)</code>", "Mehrere Parameter werden durch Komma getrennt: <code>(int breite, int hoehe)</code>", "Methodennamen: klein anfangen, bei mehreren W&ouml;rtern Kamelh&ouml;ckerschreibweise (z.&nbsp;B. <code>berechneFlaeche</code>)", "Ein Methodenaufruf mit Parametern braucht IMMER passende Werte in der Klammer, z.&nbsp;B. <code>berechneFlaeche(5, 4)</code>"], "example_title": "Beispiel: Methode mit Rückgabewert", "example": "public int berechneFlaeche(int breite, int hoehe) {\n    return breite * hoehe;\n}\n\nAufruf: berechneFlaeche(5, 4)  liefert als Ergebnis  20\n\nBeispiel ohne Rueckgabewert:\npublic void dreheUm180Grad() {\n    dreheLinks();\n    dreheLinks();\n}", "exercises": [{"q": "Schreibe den Methodenkopf f&uuml;r eine Methode <code>sagHallo</code>, die NICHTS zur&uuml;ckgibt und keine Parameter hat.", "sol": "<code>public void sagHallo() { }</code>"}, {"q": "Schreibe den Methodenkopf f&uuml;r eine Methode <code>verdopple</code>, die eine Ganzzahl <code>zahl</code> als Parameter bekommt und eine Ganzzahl zur&uuml;ckgibt.", "sol": "<code>public int verdopple(int zahl) { return zahl * 2; }</code>"}, {"q": "Was gibt der Aufruf <code>berechneFlaeche(6, 3)</code> zur&uuml;ck, wenn die Methode <code>breite * hoehe</code> berechnet?", "sol": "18 (6 mal 3)"}, {"q": "Woran erkennst du im Methodenkopf, ob eine Methode einen R&uuml;ckgabewert liefert?", "sol": "Steht kein void vor dem Methodennamen, sondern ein Datentyp (z.B. int, String, boolean), dann liefert die Methode einen Rueckgabewert."}, {"q": "Schreibe eine Methode <code>melde(String text, boolean istWichtig)</code> &ndash; nur den Kopf, kein Inhalt n&ouml;tig.", "sol": "<code>public void melde(String text, boolean istWichtig) { }</code>"}], "quiz": [{"q": "Was bedeutet <code>void</code> im Methodenkopf?", "opts": ["Die Methode ist leer", "Die Methode gibt nichts zurueck", "Die Methode hat einen Fehler", "Die Methode ist privat"], "correct": 1, "expl": "void heisst: kein Rueckgabewert"}, {"q": "Wo stehen die Parameter einer Methode?", "opts": ["Im Methodenrumpf", "Im Methodennamen", "In den runden Klammern des Methodenkopfs", "Nach dem return"], "correct": 2, "expl": "Parameter stehen mit Datentyp in den runden Klammern"}, {"q": "Eine Methode mit Rueckgabewert braucht im Rumpf zwingend...", "opts": ["ein return", "ein void", "zwei Parameter", "nichts Besonderes"], "correct": 0, "expl": "Ohne return kann kein Wert zurueckgegeben werden"}, {"q": "Was liefert <code>berechneFlaeche(5, 4)</code> bei <code>return breite*hoehe;</code>?", "opts": ["9", "1", "20", "45"], "correct": 2, "expl": "5 * 4 = 20"}, {"q": "Wie nennt man die erste Zeile einer Methode (mit Name, Parametern, Rueckgabetyp)?", "opts": ["Methodenrumpf", "Methodenkopf/Signatur", "Konstruktor", "Attribut"], "correct": 1, "expl": "Das ist der Methodenkopf, auch Signatur genannt"}]}, {"id": "m6", "icon": "🏗️", "num": 6, "title": "Konstruktor & Getter-Methoden", "intro": "Lernbereich 3 &middot; Objekte erzeugen & Attribute abfragen", "explain": "\nEin <b>Konstruktor</b> ist eine SPEZIELLE Methode, die automatisch aufgerufen wird, wenn ein neues\nObjekt erzeugt wird (mit <code>new Klassenname(...)</code>). Er richtet den Startzustand der\nAttribute ein.<br><br>\nRegeln f&uuml;r den Konstruktor: Der Name MUSS genau wie die Klasse hei&szlig;en (gro&szlig;/klein\nbeachten!), und er hat KEINEN R&uuml;ckgabetyp (auch kein void!).<br><br>\nEine <b>Getter-Methode</b> (\"Informator\") gibt den Wert eines Attributs zur&uuml;ck, ohne etwas zu\n&auml;ndern. Sie beginnt immer mit <code>get</code>, gefolgt vom Attributnamen (gro&szlig; geschrieben),\nz.&nbsp;B. <code>getName()</code>. Sie hat keine Parameter und liefert den Attributwert per\n<code>return</code>.\n", "rules": ["Konstruktor hei&szlig;t IMMER genauso wie die Klasse &ndash; z.&nbsp;B. Klasse <code>Person</code> &rarr; Konstruktor <code>public Person(...)</code>", "Konstruktor hat NIEMALS einen R&uuml;ckgabetyp &ndash; auch kein void!", "Konstruktor wird automatisch beim <code>new Klassenname(...)</code> aufgerufen", "Getter beginnt mit <code>get</code> + Attributname (gro&szlig; geschrieben), z.&nbsp;B. <code>getAlter()</code>", "Getter hat KEINE Parameter, gibt aber den Attributwert per <code>return</code> zur&uuml;ck", "Bei Namenskonflikt (Parameter = Attribut) im Konstruktor: <code>this.attribut = attribut;</code>"], "example_title": "Beispiel: Konstruktor & Getter", "example": "public class Person {\n    private String name;\n    private int alter;\n\n    // Konstruktor mit Parametern\n    public Person(String name, int alter) {\n        this.name = name;\n        this.alter = alter;\n    }\n\n    // Getter-Methoden\n    public String getName() {\n        return name;\n    }\n    public int getAlter() {\n        return alter;\n    }\n}\n// Neues Objekt erzeugen (ruft automatisch den Konstruktor auf):\nPerson p = new Person(\"Thomas Mueller\", 36);", "exercises": [{"q": "Klasse <code>Steckbrief</code> mit Attributen <code>name</code> (String) und <code>alter</code> (int). Schreibe einen Konstruktor OHNE Parameter, der name auf \"Thomas M&uuml;ller\" und alter auf 36 setzt.", "sol": "<code>public Steckbrief() {\n    name = \"Thomas Mueller\";\n    alter = 36;\n}</code>"}, {"q": "Schreibe f&uuml;r die Klasse <code>Steckbrief</code> die Getter-Methode f&uuml;r das Attribut <code>alter</code>.", "sol": "<code>public int getAlter() {\n    return alter;\n}</code>"}, {"q": "Klasse <code>GUTSCHEIN</code> mit Attributen <code>float rabatt</code>, <code>float mindesteinkauf</code>, <code>String code</code>. Schreibe einen Konstruktor MIT Parametern, der alle drei Attribute setzt (nutze this.).", "sol": "<code>public GUTSCHEIN(float rabatt, float mindesteinkauf, String code) {\n    this.rabatt = rabatt;\n    this.mindesteinkauf = mindesteinkauf;\n    this.code = code;\n}</code>"}, {"q": "Warum darf ein Konstruktor KEIN void vor dem Namen stehen haben (im Gegensatz zu normalen Methoden)?", "sol": "Ein Konstruktor ist keine normale Methode und hat generell KEINEN Rueckgabetyp &ndash; auch void ist ein Rueckgabetyp-Hinweis und gehoert dort nicht hin."}, {"q": "Schreibe die Getter-Methode f&uuml;r das Attribut <code>String code</code> aus der Klasse GUTSCHEIN.", "sol": "<code>public String getCode() {\n    return code;\n}</code>"}], "quiz": [{"q": "Wie muss der Name eines Konstruktors lauten?", "opts": ["Immer 'konstruktor'", "Genauso wie die Klasse", "Immer 'init'", "Beliebig"], "correct": 1, "expl": "Der Konstruktorname muss exakt (auch Gross-/Kleinschreibung) dem Klassennamen entsprechen"}, {"q": "Welchen Rueckgabetyp hat ein Konstruktor?", "opts": ["void", "int", "Keinen (auch kein void!)", "String"], "correct": 2, "expl": "Konstruktoren haben ueberhaupt keinen Rueckgabetyp"}, {"q": "Wann wird der Konstruktor aufgerufen?", "opts": ["Nie automatisch", "Automatisch bei new Klassenname(...)", "Nur bei getX()", "Beim Loeschen des Objekts"], "correct": 1, "expl": "new ruft automatisch den Konstruktor auf"}, {"q": "Wie beginnt eine Getter-Methode fuer das Attribut 'farbe'?", "opts": ["setFarbe()", "farbeGet()", "getFarbe()", "get_farbe"], "correct": 2, "expl": "get + Attributname mit grossem Anfangsbuchstaben: getFarbe()"}, {"q": "Was steht im Rumpf einer Getter-Methode?", "opts": ["this.attribut = wert;", "return attribut;", "void attribut;", "new attribut();"], "correct": 1, "expl": "Ein Getter gibt lediglich den aktuellen Attributwert zurueck"}]}, {"id": "m7", "icon": "🔀", "num": 7, "title": "Bedingungen & Schleifen (Kontrollstrukturen)", "intro": "Lernbereich 3 &middot; if/else, Vergleiche, while", "explain": "\nMit <b>Bedingungen</b> kann ein Programm Entscheidungen treffen. Ein Vergleich liefert immer\n<code>true</code> oder <code>false</code>: <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>,\n<code>&lt;=</code>, <code>==</code> (gleich/identisch), <code>!=</code> (ungleich).<br><br>\nLogische Verkn&uuml;pfungen: <code>&amp;&amp;</code> (UND &ndash; beide m&uuml;ssen stimmen),\n<code>||</code> (ODER &ndash; mindestens eine muss stimmen), <code>!</code> (NICHT &ndash; kehrt um).<br><br>\n<b>Einseitig bedingte Anweisung:</b> <code>if (Bedingung) { ... }</code> &ndash; wird nur ausgef&uuml;hrt,\nwenn die Bedingung wahr ist.<br>\n<b>Zweiseitig bedingte Anweisung:</b> <code>if (...) { ... } else { ... }</code> &ndash; entweder das\neine oder das andere wird ausgef&uuml;hrt.<br><br>\nEine <b>while-Schleife</b> wiederholt Anweisungen, SOLANGE eine Bedingung wahr ist:\n<code>while (Bedingung) { ... }</code>. Achtung: Die Bedingung muss irgendwann falsch werden,\nsonst gibt es eine <b>Endlosschleife</b>!\n", "rules": ["Gleichheit pr&uuml;fen: ZWEI Gleichheitszeichen <code>==</code> (ein <code>=</code> ist eine Zuweisung!)", "<code>&amp;&amp;</code> = UND (beide Bedingungen m&uuml;ssen wahr sein)", "<code>||</code> = ODER (mindestens eine Bedingung muss wahr sein)", "<code>!</code> = NICHT (kehrt wahr/falsch um)", "<code>if (Bedingung) { A } else { B }</code>: Bedingung wahr &rarr; A, sonst &rarr; B", "<code>while (Bedingung) { ... }</code> wiederholt, SOLANGE die Bedingung wahr ist &ndash; sie MUSS irgendwann falsch werden!"], "example_title": "Beispiel: if/else und while", "example": "// Zweiseitig bedingte Anweisung:\nif (istAufSchraube()) {\n    aufnehmen();\n} else {\n    ablegen(\"Schraube\");\n}\n\n// While-Schleife: laeuft vor, bis eine Wand kommt\npublic void vorBisWand() {\n    while (istVorneFrei()) {\n        einsVor();\n    }\n}\n\n// Komplexe Bedingung:\nif (istAufAkku() && !(istWandVorne() && istWandRechts())) {\n    ladeAkku();\n}", "exercises": [{"q": "Formuliere die Bedingung: \"Zahl ist zwischen 4 und 10 (beides eingeschlossen)\"", "sol": "<code>(zahl >= 4) && (zahl <= 10)</code>"}, {"q": "Formuliere die Bedingung: \"Zahl ist kleiner als 4 ODER gr&ouml;&szlig;er als 10\"", "sol": "<code>(zahl < 4) || (zahl > 10)</code>"}, {"q": "Finde den Fehler: <code>if (zahl = 5) { ... }</code>", "sol": "Es muss <code>==</code> statt <code>=</code> heissen: <code>if (zahl == 5) { ... }</code>. Ein einzelnes = ist eine Zuweisung, kein Vergleich!"}, {"q": "Schreibe eine while-Schleife, die vorwaerts geht (einsVor()), solange vorne kein Fass UND keine Wand ist.", "sol": "<code>while (!istFassVorne() && !istWandVorne()) {\n    einsVor();\n}</code>"}, {"q": "Was passiert, wenn die Bedingung einer while-Schleife NIE falsch wird?", "sol": "Es entsteht eine Endlosschleife &ndash; das Programm haengt sich auf und wiederholt die Anweisungen unendlich oft."}], "quiz": [{"q": "Wie prueft man in Java, ob zwei Werte GLEICH sind?", "opts": ["mit =", "mit ==", "mit ===", "mit gleich()"], "correct": 1, "expl": "== ist der Vergleichsoperator fuer Gleichheit"}, {"q": "Was bedeutet &amp;&amp;?", "opts": ["ODER", "UND", "NICHT", "Gleich"], "correct": 1, "expl": "&& ist der UND-Operator: beide Seiten muessen wahr sein"}, {"q": "Wann wird der else-Teil ausgefuehrt?", "opts": ["Immer", "Nur wenn die if-Bedingung falsch ist", "Nur wenn die if-Bedingung wahr ist", "Nie"], "correct": 1, "expl": "else greift genau dann, wenn die if-Bedingung nicht erfuellt ist"}, {"q": "Eine while-Schleife wiederholt sich...", "opts": ["genau einmal", "solange die Bedingung wahr ist", "solange die Bedingung falsch ist", "immer 10 Mal"], "correct": 1, "expl": "Solange die Bedingung true liefert, wird der Schleifenrumpf wiederholt"}, {"q": "Was ist eine Endlosschleife?", "opts": ["Eine besonders schnelle Schleife", "Eine Schleife, deren Bedingung nie falsch wird", "Ein Fehler beim Kompilieren", "Eine Schleife ohne Bedingung"], "correct": 1, "expl": "Wird die Bedingung nie falsch, laeuft die Schleife ewig weiter"}, {"q": "Was bedeutet das Ausrufezeichen ! vor einer Bedingung, z.B. !istWandVorne()?", "opts": ["UND", "ODER", "NICHT (kehrt true/false um)", "Vergleich"], "correct": 2, "expl": "! kehrt den Wahrheitswert um: aus true wird false und umgekehrt"}]}, {"id": "m8", "icon": "🧬", "num": 8, "title": "Vererbung (Generalisierung & Spezialisierung)", "intro": "Lernbereich 3 &middot; Ober- und Unterklassen", "explain": "\nManchmal haben mehrere Klassen viele gemeinsame Attribute und Methoden. Statt alles doppelt zu\nschreiben (Copy-Paste), nutzt man <b>Vererbung</b>: Eine <b>Unterklasse</b> \"erbt\" automatisch ALLE\nAttribute und Methoden einer <b>Oberklasse</b>.<br><br>\nIn Java schreibt man das mit dem Schl&uuml;sselwort <code>extends</code>:\n<code>class Hund extends Tier { ... }</code> bedeutet: Hund ist eine Unterklasse von Tier und bekommt\nautomatisch alles, was Tier hat &ndash; PLUS kann Hund noch eigene, zus&auml;tzliche Attribute/Methoden\nhaben.<br><br>\nEine Unterklasse kann eine geerbte Methode auch <b>&uuml;berschreiben</b>, d.&nbsp;h. eine eigene\nVersion davon definieren, die die geerbte Version ersetzt.\n", "rules": ["<code>extends</code> = \"erbt von\" &ndash; <code>Unterklasse extends Oberklasse</code>", "Die Unterklasse bekommt AUTOMATISCH alle Attribute und Methoden der Oberklasse dazu", "Die Unterklasse kann zus&auml;tzlich EIGENE Attribute/Methoden haben", "Methoden der Oberklasse k&ouml;nnen in der Unterklasse &uuml;berschrieben werden (eigene Version)", "Merksatz: Oberklasse = allgemeiner (z.&nbsp;B. \"Tier\"), Unterklasse = spezieller (z.&nbsp;B. \"Hund\")", "Eine Unterklasse kann selbst wieder Oberklasse einer weiteren Unterklasse sein (Vererbungskette)"], "example_title": "Beispiel: Vererbung", "example": "class Roboter {\n    int energie;\n    public void einsVor() { ... }\n    public void dreheLinks() { ... }\n}\n\nclass AB5 extends Roboter {\n    // AB5 hat automatisch: energie, einsVor(), dreheLinks()\n    public boolean istFassVorne() { ... }   // NEUE, eigene Methode\n}\n\nclass AB6_AB7 extends AB5 {\n    // AB6_AB7 hat automatisch ALLES von AB5 UND von Roboter!\n    int anzahlBrennstaebe;\n}", "exercises": [{"q": "Klasse <code>Fahrzeug</code> hat Attribut <code>geschwindigkeit</code>. Klasse <code>Auto</code> soll alles von Fahrzeug erben. Schreibe die Klassendefinition (erste Zeile).", "sol": "<code>class Auto extends Fahrzeug { ... }</code>"}, {"q": "Klasse <code>AB6_AB7</code> ist eine Unterklasse von <code>AB5</code>, die wiederum Unterklasse von <code>Roboter</code> ist. Kann ein Objekt der Klasse AB6_AB7 Methoden von Roboter aufrufen? Begr&uuml;nde.", "sol": "Ja! Da AB6_AB7 (indirekt ueber AB5) von Roboter erbt, bekommt es automatisch auch alle Methoden von Roboter."}, {"q": "Was bedeutet es, eine Methode zu \"&uuml;berschreiben\"?", "sol": "Die Unterklasse definiert eine eigene Version einer Methode, die es schon in der Oberklasse gibt &ndash; diese eigene Version wird dann statt der geerbten verwendet."}, {"q": "Nenne ein Beispiel aus dem Alltag f&uuml;r Ober- und Unterklasse (au&szlig;er Tier/Hund).", "sol": "Z.B. Oberklasse 'Fahrzeug', Unterklassen 'Auto', 'Fahrrad', 'Lkw' &ndash; alle haben gemeinsame Eigenschaften (z.B. geschwindigkeit), aber auch eigene."}], "quiz": [{"q": "Welches Schluesselwort wird fuer Vererbung in Java verwendet?", "opts": ["inherits", "extends", "uses", "super"], "correct": 1, "expl": "extends verbindet Unterklasse und Oberklasse"}, {"q": "Was bekommt eine Unterklasse von ihrer Oberklasse?", "opts": ["Nichts automatisch", "Nur den Klassennamen", "Alle Attribute und Methoden", "Nur die Attribute, keine Methoden"], "correct": 2, "expl": "Die Unterklasse erbt ALLE (zugaenglichen) Attribute und Methoden"}, {"q": "class Hund extends Tier { } bedeutet:", "opts": ["Tier ist Unterklasse von Hund", "Hund ist Unterklasse von Tier", "Hund und Tier sind unabhaengig", "Ein Syntaxfehler"], "correct": 1, "expl": "Der Klassenname VOR extends ist die Unterklasse, danach kommt die Oberklasse"}, {"q": "Kann eine Unterklasse zusaetzliche, eigene Attribute haben?", "opts": ["Nein, nur geerbte", "Ja, zusaetzlich zu den geerbten", "Nur Methoden, keine Attribute", "Nur wenn sie 'public' ist"], "correct": 1, "expl": "Die Unterklasse kann ergaenzen, was sie zusaetzlich braucht"}, {"q": "Eine Methode 'ueberschreiben' bedeutet:", "opts": ["Sie loeschen", "Eine eigene Version in der Unterklasse definieren", "Sie umbenennen", "Sie kopieren in eine andere Datei"], "correct": 1, "expl": "Ueberschreiben = eigene, abweichende Umsetzung einer geerbten Methode"}]}], "exams": [{"id": "exam1", "title": "&Uuml;bungspr&uuml;fung 1", "minutes": 60, "maxpoints": 40, "questions": [{"type": "mc", "points": 1, "q": "Womit beginnt jede Formel in Excel?", "opts": ["Mit +", "Mit =", "Mit #"], "correct": 1}, {"type": "open", "points": 2, "q": "In A1 steht der Preis (8&euro;), in B1 die Menge (5). Schreibe die Excel-Formel f&uuml;r den Gesamtpreis in C1.", "sol": "<code>=A1*B1</code>"}, {"type": "open", "points": 2, "q": "Erkl&auml;re den Unterschied zwischen relativem und absolutem Zellbezug in eigenen Worten.", "sol": "Relativer Bezug (z.B. B2) veraendert sich automatisch beim Kopieren der Formel. Absoluter Bezug (z.B. $B$2) bleibt beim Kopieren immer gleich."}, {"type": "open", "points": 3, "q": "Gegeben: Tabelle <code>Schueler</code> mit Spalten <code>name</code>, <code>klasse</code>, <code>note</code>. Schreibe eine SQL-Abfrage, die Name und Note aller Sch&uuml;ler der Klasse 9a zeigt.", "sol": "<code>SELECT name, note FROM Schueler WHERE klasse = '9a';</code>"}, {"type": "open", "points": 2, "q": "Schreibe eine SQL-Abfrage, die alle Datens&auml;tze aus <code>Schueler</code> nach Note sortiert (beste zuerst, also aufsteigend) zeigt.", "sol": "<code>SELECT * FROM Schueler ORDER BY note ASC;</code>"}, {"type": "mc", "points": 1, "q": "Ein Primaerschluessel ist...", "opts": ["eine eindeutige ID pro Datensatz", "die teuerste Spalte", "ein Passwort"], "correct": 0}, {"type": "open", "points": 2, "q": "Erkl&auml;re den Unterschied zwischen Klasse und Objekt an einem selbst gew&auml;hlten Beispiel.", "sol": "Die Klasse ist der Bauplan (z.B. 'Fahrrad'), das Objekt ist ein konkretes Exemplar davon (z.B. dein eigenes Fahrrad). Von einer Klasse kann es beliebig viele Objekte geben."}, {"type": "open", "points": 3, "q": "Gegeben: Klasse <code>Buch</code> mit Attributen <code>titel</code> (String) und <code>seiten</code> (int). Zeichne/beschreibe die Klassenkarte (Klassenname, Attribute mit Datentyp).", "sol": "Klassenname: Buch\nAttribute: titel: String, seiten: int\n(optional Methoden, falls angegeben)"}, {"type": "open", "points": 4, "q": "Schreibe f&uuml;r die Klasse <code>Buch</code> (Attribute <code>titel</code>: String, <code>seiten</code>: int) einen Konstruktor MIT Parametern (verwende this.).", "sol": "<code>public Buch(String titel, int seiten) {\n    this.titel = titel;\n    this.seiten = seiten;\n}</code>"}, {"type": "open", "points": 3, "q": "Schreibe die Getter-Methode f&uuml;r das Attribut <code>seiten</code> der Klasse Buch.", "sol": "<code>public int getSeiten() {\n    return seiten;\n}</code>"}, {"type": "mc", "points": 1, "q": "Welcher Datentyp passt zu einer Ja/Nein-Aussage?", "opts": ["int", "boolean", "char"], "correct": 1}, {"type": "open", "points": 2, "q": "Was ist falsch an dieser Zeile: <code>if (note = 1) { ... }</code>? Korrigiere sie.", "sol": "Es muss ein Vergleich (==) statt einer Zuweisung (=) sein: <code>if (note == 1) { ... }</code>"}, {"type": "open", "points": 3, "q": "Formuliere die Bedingung: \"Die Note ist mindestens 1 und h&ouml;chstens 3\" (Variable note).", "sol": "<code>(note >= 1) && (note <= 3)</code>"}, {"type": "open", "points": 4, "q": "Schreibe eine while-Schleife, die eine Methode einsVor() aufruft, solange die Methode istVorneFrei() true liefert.", "sol": "<code>while (istVorneFrei()) {\n    einsVor();\n}</code>"}, {"type": "open", "points": 4, "q": "Klasse <code>Katze</code> soll alle Attribute und Methoden der Klasse <code>Tier</code> erben, zus&auml;tzlich ein eigenes Attribut <code>schnurrt</code> (boolean) besitzen. Schreibe die Klassendefinition (erste Zeile reicht + das neue Attribut).", "sol": "<code>class Katze extends Tier {\n    boolean schnurrt;\n}</code>"}, {"type": "mc", "points": 1, "q": "Was bedeutet das Schluesselwort extends?", "opts": ["kopiert eine Klasse", "erbt von einer Oberklasse", "loescht eine Klasse"], "correct": 1}, {"type": "open", "points": 2, "q": "Nenne den Unterschied zwischen einem Attribut und einer lokalen Variable.", "sol": "Ein Attribut gehoert zur Klasse und existiert, solange das Objekt existiert. Eine lokale Variable existiert nur innerhalb einer Methode und ist danach wieder weg."}]}, {"id": "exam2", "title": "&Uuml;bungspr&uuml;fung 2", "minutes": 60, "maxpoints": 40, "questions": [{"type": "mc", "points": 1, "q": "Wie lautet die richtige Zelladresse fuer Spalte E, Zeile 3?", "opts": ["3E", "E3", "E:3"], "correct": 1}, {"type": "open", "points": 3, "q": "In B2 steht ein fester Mehrwertsteuersatz (0,19), der beim Kopieren der Formel <code>=A5*B2</code> IMMER auf B2 zeigen soll. Schreibe die korrekte Formel.", "sol": "<code>=A5*$B$2</code>"}, {"type": "open", "points": 3, "q": "Was zeigt <code>=SUMME(B2:B10)</code> und wof&uuml;r k&ouml;nnte man das in der Praxis brauchen? Nenne ein Beispiel.", "sol": "Addiert alle Werte von B2 bis B10, z.B. um die Gesamtausgaben eines Monats aus mehreren Posten zu berechnen."}, {"type": "open", "points": 4, "q": "Tabelle <code>Kleidung</code> (artikelnummer, art, farbe, preis). Schreibe eine SQL-Abfrage, die alle Artikel zeigt, die ROT sind UND weniger als 25 Euro kosten.", "sol": "<code>SELECT * FROM Kleidung WHERE farbe = 'rot' AND preis < 25;</code>"}, {"type": "open", "points": 2, "q": "Schreibe eine SQL-Abfrage, die alle unterschiedlichen Farben aus <code>Kleidung</code> zeigt (keine Duplikate).", "sol": "<code>SELECT DISTINCT farbe FROM Kleidung;</code>"}, {"type": "mc", "points": 1, "q": "SELECT * FROM Kleidung bedeutet:", "opts": ["nur Preis zeigen", "alle Spalten zeigen", "Tabelle loeschen"], "correct": 1}, {"type": "open", "points": 3, "q": "Zeichne/beschreibe eine Objektkarte f&uuml;r ein Objekt der Klasse <code>Buch</code> (titel: String, seiten: int) mit den Werten \"Harry Potter\" und 320.", "sol": "Objektname:Klassenname (z.B. hp:Buch)\ntitel = \"Harry Potter\"\nseiten = 320"}, {"type": "open", "points": 3, "q": "Nenne die 5 wichtigsten Datentypen in Java und je ein Beispiel.", "sol": "int (42), double (3.14), String (\"Text\"), char ('A'), boolean (true)"}, {"type": "open", "points": 4, "q": "Klasse <code>Auto</code> mit Attributen <code>marke</code> (String) und <code>ps</code> (int). Schreibe Konstruktor MIT Parametern und beide Getter-Methoden.", "sol": "<code>public Auto(String marke, int ps) {\n    this.marke = marke;\n    this.ps = ps;\n}\npublic String getMarke() { return marke; }\npublic int getPs() { return ps; }</code>"}, {"type": "open", "points": 3, "q": "Schreibe eine Methode <code>public int verdreifache(int zahl)</code>, die den dreifachen Wert zur&uuml;ckgibt.", "sol": "<code>public int verdreifache(int zahl) {\n    return zahl * 3;\n}</code>"}, {"type": "mc", "points": 1, "q": "Zwei Gleichheitszeichen (==) bedeuten:", "opts": ["Zuweisung", "Vergleich", "Kommentar"], "correct": 1}, {"type": "open", "points": 3, "q": "Formuliere: \"Der Roboter hat KEINE Energie mehr UND steht vor einer Wand\" als Java-Bedingung (Methoden: istEnergieLeer(), istWandVorne()).", "sol": "<code>istEnergieLeer() && istWandVorne()</code>"}, {"type": "open", "points": 4, "q": "Schreibe eine if-else-Anweisung: Wenn <code>istAufSchraube()</code> wahr ist, soll <code>aufnehmen()</code> aufgerufen werden, sonst <code>ablegen(\"Schraube\")</code>.", "sol": "<code>if (istAufSchraube()) {\n    aufnehmen();\n} else {\n    ablegen(\"Schraube\");\n}</code>"}, {"type": "open", "points": 3, "q": "Warum kann eine while-Schleife zu einer Endlosschleife werden? Wie vermeidet man das?", "sol": "Wenn die Bedingung nie falsch wird, laeuft die Schleife ewig. Man muss sicherstellen, dass sich im Schleifenrumpf etwas aendert, das die Bedingung irgendwann falsch werden laesst."}, {"type": "open", "points": 2, "q": "Klasse <code>Sportwagen</code> soll Unterklasse von <code>Auto</code> sein. Schreibe die erste Zeile der Klassendefinition.", "sol": "<code>class Sportwagen extends Auto {</code>"}]}, {"id": "exam3", "title": "&Uuml;bungspr&uuml;fung 3 (Kurzversion)", "minutes": 40, "maxpoints": 26, "questions": [{"type": "mc", "points": 1, "q": "Ein absoluter Zellbezug wird geschrieben als:", "opts": ["B2", "$B$2", "#B2"], "correct": 1}, {"type": "open", "points": 2, "q": "Schreibe die SQL-Abfrage: Zeige Name und Preis aus der Tabelle Produkte, sortiert nach Preis (teuerstes zuerst).", "sol": "<code>SELECT name, preis FROM Produkte ORDER BY preis DESC;</code>"}, {"type": "open", "points": 2, "q": "Was ist der Unterschied zwischen Attribut und Attributwert?", "sol": "Attribut = die Eigenschaft an sich (z.B. 'farbe'), Attributwert = der konkrete Wert bei einem Objekt (z.B. 'rot')."}, {"type": "mc", "points": 1, "q": "Ein Konstruktor hat als Rueckgabetyp:", "opts": ["void", "int", "keinen"], "correct": 2}, {"type": "open", "points": 4, "q": "Klasse <code>Handy</code> mit Attributen <code>modell</code> (String) und <code>akku</code> (int). Schreibe Konstruktor und Getter fuer akku.", "sol": "<code>public Handy(String modell, int akku) {\n    this.modell = modell;\n    this.akku = akku;\n}\npublic int getAkku() { return akku; }</code>"}, {"type": "open", "points": 3, "q": "Schreibe eine Methode <code>public boolean istVolljaehrig(int alter)</code>, die true zurueckgibt, wenn alter mindestens 18 ist.", "sol": "<code>public boolean istVolljaehrig(int alter) {\n    return alter >= 18;\n}</code>"}, {"type": "open", "points": 3, "q": "Formuliere als Bedingung: \"Note ist schlechter als 4 ODER Fach ist Sport\" (Variablen note, fach).", "sol": "<code>(note > 4) || (fach.equals(\"Sport\"))</code>  (bzw. vereinfacht: note > 4 || fach == \"Sport\")"}, {"type": "open", "points": 3, "q": "Schreibe eine while-Schleife, die zaehler von 0 aus so lange um 1 erhoeht, bis zaehler gleich 10 ist. (zaehler ist bereits deklariert und = 0)", "sol": "<code>while (zaehler != 10) {\n    zaehler = zaehler + 1;\n}</code>"}, {"type": "mc", "points": 1, "q": "extends bedeutet:", "opts": ["erbt von", "loescht", "kopiert"], "correct": 0}, {"type": "open", "points": 3, "q": "Erklaere in 1-2 Saetzen, was eine Unterklasse von ihrer Oberklasse bekommt.", "sol": "Die Unterklasse erbt automatisch alle (zugaenglichen) Attribute und Methoden der Oberklasse und kann zusaetzlich eigene ergaenzen oder geerbte Methoden ueberschreiben."}, {"type": "open", "points": 3, "q": "Welcher Datentyp fuer: (a) Anzahl Geschwister, (b) Taschengeld in Euro mit Cent, (c) Notendurchschnitt-Symbol als einzelnes Zeichen?", "sol": "(a) int, (b) double, (c) char"}]}]};
+const PLAN = DATA.plan;
+const MODULES = DATA.modules;
+const EXAMS = DATA.exams;
+
+// ---------- Storage helpers ----------
+function loadState() {
+  try { return JSON.parse(localStorage.getItem('info9_state') || '{}'); }
+  catch(e) { return {}; }
+}
+function saveState(s) {
+  try { localStorage.setItem('info9_state', JSON.stringify(s)); } catch(e) {}
+}
+let STATE = loadState();
+STATE.days = STATE.days || {};
+STATE.quiz = STATE.quiz || {};
+STATE.exam = STATE.exam || {};
+
+// ---------- Tabs ----------
+document.querySelectorAll('nav.tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-' + btn.dataset.view).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+function goToModule(id) {
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelector('nav.tabs button[data-view="themen"]').classList.add('active');
+  document.getElementById('view-themen').classList.add('active');
+  setTimeout(() => {
+    const el = document.getElementById('mod-' + id);
+    if (el) {
+      openModule(id, true);
+      el.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  }, 60);
+}
+function goToExam(id) {
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelector('nav.tabs button[data-view="pruefungen"]').classList.add('active');
+  document.getElementById('view-pruefungen').classList.add('active');
+  setTimeout(() => {
+    const el = document.getElementById('exam-' + id);
+    if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 60);
+}
+
+// ---------- Countdown ----------
+function renderCountdown() {
+  const examDate = new Date('2026-09-01T08:00:00');
+  const now = new Date();
+  const diffMs = examDate - now;
+  const el = document.getElementById('countdown');
+  if (diffMs <= 0) { el.innerHTML = "Die Pr&uuml;fungswoche ist da &ndash; du hast das drauf!"; return; }
+  const days = Math.ceil(diffMs / (1000*60*60*24));
+  el.innerHTML = "&#9203; Noch ca. " + days + " Tage bis zur Pr&uuml;fungswoche (erste Septemberwoche)";
+}
+renderCountdown();
+
+// ---------- PLAN view ----------
+function renderPlan() {
+  const list = document.getElementById('plan-list');
+  list.innerHTML = '';
+  let totalTasks = 0, doneTasks = 0;
+  PLAN.forEach((day, idx) => {
+    if (day.minutes > 0) totalTasks++;
+    const isDone = !!STATE.days[idx];
+    if (isDone && day.minutes > 0) doneTasks++;
+    const div = document.createElement('div');
+    div.className = 'day-card' + (day.minutes === 0 ? ' free' : '') + (isDone ? ' done' : '');
+    let tasksHtml = day.tasks.map(t => '<li>' + t + '</li>').join('');
+    let jump = '';
+    if (day.module && day.module.startsWith('exam')) {
+      jump = '<a class="jump-link" onclick="goToExam(\'' + day.module + '\')">&#8594; Zur ' + (EXAMS.find(e=>e.id===day.module)||{title:'Pr&uuml;fung'}).title + '</a>';
+    } else if (day.module) {
+      const mod = MODULES.find(m => m.id === day.module);
+      if (mod) jump = '<a class="jump-link" onclick="goToModule(\'' + day.module + '\')">&#8594; Zu Modul ' + mod.num + ': ' + mod.title + '</a>';
+    }
+    div.innerHTML =
+      '<div class="day-head">' +
+        '<span class="day-date">' + day.date + ' &middot; Woche ' + day.week + '</span>' +
+        (day.minutes > 0 ? '<span class="day-minutes">&#9200; ca. ' + day.minutes + ' Min.</span>' : '<span class="day-minutes">&#127796; frei</span>') +
+      '</div>' +
+      '<div class="day-title">' + day.title + '</div>' +
+      '<ul>' + tasksHtml + '</ul>' +
+      jump +
+      (day.minutes > 0 ? '<div style="margin-top:10px;"><button class="day-btn ' + (isDone ? 'done' : 'todo') + '" onclick="toggleDay(' + idx + ')">' + (isDone ? '&#10003; Erledigt' : 'Als erledigt markieren') + '</button></div>' : '');
+    list.appendChild(div);
+  });
+  const pct = totalTasks ? Math.round((doneTasks/totalTasks)*100) : 0;
+  document.getElementById('plan-progress-fill').style.width = pct + '%';
+  document.getElementById('plan-progress-text').textContent = pct + '% (' + doneTasks + ' von ' + totalTasks + ' Lerntagen)';
+}
+function toggleDay(idx) {
+  STATE.days[idx] = !STATE.days[idx];
+  saveState(STATE);
+  renderPlan();
+}
+renderPlan();
+
+// ---------- THEMEN / MODULES view ----------
+function openModule(id, forceOpen) {
+  const body = document.getElementById('body-' + id);
+  if (!body) return;
+  if (forceOpen) { body.classList.add('open'); return; }
+  body.classList.toggle('open');
+}
+function renderModules() {
+  const wrap = document.getElementById('module-list');
+  wrap.innerHTML = '';
+  MODULES.forEach(mod => {
+    const card = document.createElement('div');
+    card.className = 'card module-card';
+    card.id = 'mod-' + mod.id;
+
+    let exercisesHtml = mod.exercises.map((ex, i) => {
+      const eid = mod.id + '-ex-' + i;
+      return '<div class="exercise">' +
+        '<div class="ex-q"><b>' + (i+1) + '.</b> ' + ex.q + '</div>' +
+        '<button class="toggle-btn" onclick="toggleSol(\'' + eid + '\')">L&ouml;sung anzeigen</button>' +
+        '<div class="ex-sol" id="sol-' + eid + '">' + ex.sol + '</div>' +
+      '</div>';
+    }).join('');
+
+    let quizHtml = mod.quiz.map((q, i) => {
+      const qid = mod.id + '-q-' + i;
+      let optsHtml = q.opts.map((opt, oi) =>
+        '<button class="quiz-opt" onclick="answerQuiz(\'' + qid + '\',' + oi + ',' + q.correct + ')" id="opt-' + qid + '-' + oi + '">' + opt + '</button>'
+      ).join('');
+      return '<div class="quiz-q">' +
+        '<div class="qq-text">' + (i+1) + '. ' + q.q + '</div>' +
+        optsHtml +
+        '<div class="quiz-expl" id="expl-' + qid + '">&#128161; ' + q.expl + '</div>' +
+      '</div>';
+    }).join('');
+
+    card.innerHTML =
+      '<div class="module-head" onclick="openModule(\'' + mod.id + '\')">' +
+        '<span class="icon">' + mod.icon + '</span>' +
+        '<div><h2>Modul ' + mod.num + ': ' + mod.title + '</h2><p class="intro">' + mod.intro + '</p></div>' +
+      '</div>' +
+      '<div class="module-body" id="body-' + mod.id + '">' +
+        '<div class="explain">' + mod.explain + '</div>' +
+        '<div class="golden-box"><h3>&#127942; Goldene Regeln &ndash; UNBEDINGT merken!</h3><ul>' + mod.rules.map(r => '<li>' + r + '</li>').join('') + '</ul></div>' +
+        '<div class="example-box"><div class="example-title">' + mod.example_title + '</div><pre>' + mod.example + '</pre></div>' +
+        '<div class="section-label">&#9997;&#65039; &Uuml;bungsaufgaben</div>' +
+        exercisesHtml +
+        '<div class="section-label">&#10067; Mini-Quiz</div>' +
+        '<div id="quizscore-' + mod.id + '"></div>' +
+        quizHtml +
+        '<button class="reset-btn" onclick="resetQuiz(\'' + mod.id + '\')">Quiz zur&uuml;cksetzen &amp; nochmal &uuml;ben</button>' +
+      '</div>';
+    wrap.appendChild(card);
+  });
+  MODULES.forEach(mod => updateQuizScore(mod.id));
+}
+function toggleSol(eid) {
+  const el = document.getElementById('sol-' + eid);
+  el.classList.toggle('open');
+}
+function answerQuiz(qid, chosen, correct) {
+  const state = STATE.quiz;
+  if (state[qid] !== undefined) return; // already answered
+  state[qid] = chosen;
+  saveState(STATE);
+  document.querySelectorAll('[id^="opt-' + qid + '-"]').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === correct) btn.classList.add('correct');
+    else if (i === chosen) btn.classList.add('wrong');
+  });
+  document.getElementById('expl-' + qid).classList.add('open');
+  const modId = qid.split('-q-')[0];
+  updateQuizScore(modId);
+}
+function updateQuizScore(modId) {
+  const mod = MODULES.find(m => m.id === modId);
+  if (!mod) return;
+  let answered = 0, correct = 0;
+  mod.quiz.forEach((q, i) => {
+    const qid = modId + '-q-' + i;
+    if (STATE.quiz[qid] !== undefined) {
+      answered++;
+      if (STATE.quiz[qid] === q.correct) correct++;
+      // re-render already-answered state on load
+      const opts = document.querySelectorAll('[id^="opt-' + qid + '-"]');
+      if (opts.length && !opts[0].disabled) {
+        opts.forEach((btn, oi) => {
+          btn.disabled = true;
+          if (oi === q.correct) btn.classList.add('correct');
+          else if (oi === STATE.quiz[qid]) btn.classList.add('wrong');
+        });
+        const expl = document.getElementById('expl-' + qid);
+        if (expl) expl.classList.add('open');
+      }
+    }
+  });
+  const scoreEl = document.getElementById('quizscore-' + modId);
+  if (!scoreEl) return;
+  if (answered === 0) { scoreEl.innerHTML = ''; return; }
+  const pct = Math.round((correct/answered)*100);
+  let color = pct >= 80 ? 'var(--good)' : (pct >= 50 ? '#d97706' : 'var(--bad)');
+  scoreEl.innerHTML = '<div class="quiz-score" style="border-left:5px solid ' + color + ';">Ergebnis: ' + correct + ' / ' + answered + ' beantwortet richtig (' + pct + '%)' +
+    (answered < mod.quiz.length ? ' &ndash; noch ' + (mod.quiz.length - answered) + ' offen' : (pct >= 80 ? ' &#127881; Stark drauf!' : ' &ndash; nochmal wiederholen lohnt sich!')) + '</div>';
+}
+function resetQuiz(modId) {
+  const mod = MODULES.find(m => m.id === modId);
+  mod.quiz.forEach((q, i) => { delete STATE.quiz[modId + '-q-' + i]; });
+  saveState(STATE);
+  renderModules();
+}
+renderModules();
+
+// ---------- EXAMS view ----------
+let examTimers = {};
+function renderExams() {
+  const wrap = document.getElementById('exam-list');
+  wrap.innerHTML = '';
+  EXAMS.forEach(exam => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.id = 'exam-' + exam.id;
+    let qHtml = exam.questions.map((q, i) => {
+      const eid = exam.id + '-eq-' + i;
+      let inner = '';
+      if (q.type === 'mc') {
+        inner = q.opts.map((opt, oi) =>
+          '<button class="quiz-opt" onclick="answerExamMc(\'' + eid + '\',' + oi + ',' + q.correct + ',' + q.points + ')" id="opt-' + eid + '-' + oi + '">' + opt + '</button>'
+        ).join('');
+      } else {
+        inner = '<button class="toggle-btn" onclick="toggleSol(\'' + eid + '\')">Musterl&ouml;sung anzeigen</button>' +
+          '<div class="ex-sol" id="sol-' + eid + '"><pre>' + q.sol + '</pre></div>' +
+          '<div class="exam-check"><label><input type="checkbox" onchange="checkExamOpen(\'' + exam.id + '\',\'' + eid + '\',' + q.points + ', this.checked)" ' + (STATE.exam[eid] ? 'checked' : '') + '> War meine Antwort (ungef&auml;hr) richtig? (+' + q.points + '&nbsp;P.)</label></div>';
+      }
+      return '<div class="exam-q">' +
+        '<div class="eq-meta">Frage ' + (i+1) + ' &middot; <span class="badge">' + q.points + ' Punkte</span></div>' +
+        '<div class="eq-text">' + q.q + '</div>' +
+        inner +
+      '</div>';
+    }).join('');
+    card.innerHTML =
+      '<div class="exam-head"><h2>' + exam.title + '</h2>' +
+      '<span class="pill">&#9200; ca. ' + exam.minutes + ' Minuten</span><span class="pill">&#127919; ' + exam.maxpoints + ' Punkte gesamt</span></div>' +
+      '<div class="exam-timer" id="timer-' + exam.id + '">' + String(exam.minutes).padStart(2,'0') + ':00</div>' +
+      '<button class="big-btn" onclick="startTimer(\'' + exam.id + '\',' + exam.minutes + ')">&#9654;&#65039; Timer starten</button>' +
+      qHtml +
+      '<div class="quiz-score" id="examscore-' + exam.id + '"></div>';
+    wrap.appendChild(card);
+  });
+  EXAMS.forEach(exam => { restoreExamState(exam); updateExamScore(exam); });
+}
+function startTimer(examId, minutes) {
+  if (examTimers[examId]) clearInterval(examTimers[examId]);
+  let remaining = minutes * 60;
+  const el = document.getElementById('timer-' + examId);
+  examTimers[examId] = setInterval(() => {
+    remaining--;
+    if (remaining < 0) { clearInterval(examTimers[examId]); el.textContent = "Zeit um!"; el.style.color = 'var(--bad)'; return; }
+    const m = Math.floor(remaining/60), s = remaining%60;
+    el.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  }, 1000);
+}
+function answerExamMc(eid, chosen, correct, points) {
+  if (STATE.exam[eid] !== undefined) return;
+  STATE.exam[eid] = (chosen === correct) ? points : 0;
+  saveState(STATE);
+  document.querySelectorAll('[id^="opt-' + eid + '-"]').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === correct) btn.classList.add('correct');
+    else if (i === chosen) btn.classList.add('wrong');
+  });
+  const examId = eid.split('-eq-')[0];
+  updateExamScore(EXAMS.find(e => e.id === examId));
+}
+function checkExamOpen(examId, eid, points, checked) {
+  STATE.exam[eid] = checked ? points : 0;
+  saveState(STATE);
+  updateExamScore(EXAMS.find(e => e.id === examId));
+}
+function restoreExamState(exam) {
+  exam.questions.forEach((q, i) => {
+    const eid = exam.id + '-eq-' + i;
+    if (STATE.exam[eid] === undefined) return;
+    if (q.type === 'mc') {
+      const opts = document.querySelectorAll('[id^="opt-' + eid + '-"]');
+      opts.forEach((btn, oi) => {
+        btn.disabled = true;
+        if (oi === q.correct) btn.classList.add('correct');
+        else if (STATE.exam[eid] === 0 && btn.classList.contains('quiz-opt')) { /* unknown which was chosen wrong, skip */ }
+      });
+    }
+  });
+}
+function updateExamScore(exam) {
+  if (!exam) return;
+  let got = 0, answered = 0;
+  exam.questions.forEach((q, i) => {
+    const eid = exam.id + '-eq-' + i;
+    if (STATE.exam[eid] !== undefined) { answered++; got += STATE.exam[eid]; }
+  });
+  const el = document.getElementById('examscore-' + exam.id);
+  if (!el) return;
+  if (answered === 0) { el.innerHTML = 'Noch keine Fragen ausgewertet.'; return; }
+  const pct = Math.round((got/exam.maxpoints)*100);
+  const grade = gradeFromPct(pct);
+  el.innerHTML = '<b>' + got + ' / ' + exam.maxpoints + ' Punkte</b> (' + pct + '%) &middot; gesch&auml;tzte Note: <b>' + grade + '</b>' +
+    (answered < exam.questions.length ? '<br><span style="font-weight:400; color:var(--muted);">(' + (exam.questions.length - answered) + ' Frage(n) noch nicht ausgewertet)</span>' : '');
+}
+function gradeFromPct(pct) {
+  if (pct >= 92) return '1';
+  if (pct >= 81) return '2';
+  if (pct >= 67) return '3';
+  if (pct >= 50) return '4';
+  if (pct >= 30) return '5';
+  return '6';
+}
+renderExams();
+
+// ---------- SPICKZETTEL view ----------
+function renderCheat() {
+  const wrap = document.getElementById('cheat-list');
+  wrap.innerHTML = '';
+  MODULES.forEach(mod => {
+    const div = document.createElement('div');
+    div.className = 'card cheat-topic';
+    div.innerHTML = '<h3>' + mod.icon + ' Modul ' + mod.num + ': ' + mod.title + '</h3><ul>' +
+      mod.rules.map(r => '<li>' + r + '</li>').join('') + '</ul>';
+    wrap.appendChild(div);
+  });
+  const gradeCard = document.createElement('div');
+  gradeCard.className = 'card';
+  gradeCard.innerHTML = '<h3 style="margin-top:0;">&#128202; Notenschl&uuml;ssel (grobe Orientierung)</h3>' +
+    '<table class="grade-table"><tr><th>Prozent</th><th>Note</th></tr>' +
+    '<tr><td>&ge; 92%</td><td>1</td></tr><tr><td>81&ndash;91%</td><td>2</td></tr>' +
+    '<tr><td>67&ndash;80%</td><td>3</td></tr><tr><td>50&ndash;66%</td><td>4 (bestanden!)</td></tr>' +
+    '<tr><td>30&ndash;49%</td><td>5</td></tr><tr><td>&lt; 30%</td><td>6</td></tr></table>' +
+    '<p style="font-size:0.85em; color:var(--muted); margin-bottom:0;">Achtung: Der tats&auml;chliche Notenschl&uuml;ssel der Nachpr&uuml;fung legt die Schule fest &ndash; das ist nur eine realistische Orientierung.</p>';
+  wrap.appendChild(gradeCard);
+}
+renderCheat();
+</script>
+</body>
+</html>
